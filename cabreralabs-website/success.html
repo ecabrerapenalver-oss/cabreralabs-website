@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Purchase Complete — Cabrera Labs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0a0f; --bg2: #12121a; --text: #e8e8ef; --text-dim: #8888a0;
+      --accent: #00d4aa; --border: rgba(255,255,255,0.06);
+      --font: 'DM Sans', sans-serif; --mono: 'JetBrains Mono', monospace;
+    }
+    body {
+      background: var(--bg); color: var(--text); font-family: var(--font);
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      padding: 2rem; -webkit-font-smoothing: antialiased;
+    }
+    .card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 20px; padding: 48px; max-width: 520px; width: 100%;
+      text-align: center;
+    }
+    .check {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: rgba(0, 212, 170, 0.1); border: 2px solid var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 24px; font-size: 32px;
+      animation: pop 0.5s ease;
+    }
+    @keyframes pop {
+      0% { transform: scale(0.5); opacity: 0; }
+      70% { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    h1 { font-size: 1.8rem; margin-bottom: 12px; }
+    .sub { color: var(--text-dim); font-size: 1.05rem; line-height: 1.6; margin-bottom: 32px; }
+    .steps {
+      text-align: left; background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border); border-radius: 12px;
+      padding: 24px; margin-bottom: 28px;
+    }
+    .steps h3 {
+      font-family: var(--mono); font-size: 0.8rem; color: var(--accent);
+      text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 16px;
+    }
+    .steps ol {
+      list-style: none; counter-reset: step; display: flex; flex-direction: column; gap: 12px;
+    }
+    .steps li {
+      counter-increment: step; display: flex; align-items: flex-start; gap: 12px;
+      color: var(--text-dim); font-size: 0.95rem; line-height: 1.5;
+    }
+    .steps li::before {
+      content: counter(step);
+      min-width: 24px; height: 24px; border-radius: 50%;
+      background: rgba(0,212,170,0.15); color: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700; flex-shrink: 0; margin-top: 2px;
+    }
+    .note {
+      background: rgba(255,193,7,0.08); border: 1px solid rgba(255,193,7,0.2);
+      border-radius: 10px; padding: 14px 18px;
+      color: #ffc107; font-size: 0.85rem; text-align: left; margin-bottom: 28px;
+    }
+    .btn-home {
+      display: inline-block; padding: 14px 32px;
+      background: var(--accent); color: var(--bg);
+      border-radius: 10px; font-weight: 700; font-size: 0.95rem;
+      text-decoration: none; transition: all 0.25s;
+    }
+    .btn-home:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,212,170,0.25); }
+    .support { margin-top: 20px; color: var(--text-dim); font-size: 0.85rem; }
+    .support a { color: var(--accent); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="check">✓</div>
+  <h1>Payment Successful!</h1>
+  <p class="sub">Your license key has been sent to your email. Check your inbox (and spam folder, just in case).</p>
+
+  <div class="steps">
+    <h3>Next Steps</h3>
+    <ol>
+      <li>Open the email from <strong style="color:var(--text);">Cabrera Labs</strong> with your license key</li>
+      <li>Open your Power BI report with the visual</li>
+      <li>Click the visual → <strong style="color:var(--text);">Format</strong> → <strong style="color:var(--text);">License</strong></li>
+      <li>Paste your key (format: XXXX-XXXX-XXXX-XXXX)</li>
+      <li>The visual activates instantly</li>
+    </ol>
+  </div>
+
+  <div class="note">
+    ⚠️ Keep your license email safe — you'll need the key if you switch devices. Each key works on up to 3 devices.
+  </div>
+
+  <a href="/" class="btn-home">← Back to Cabrera Labs</a>
+  <p class="support">Need help? <a href="mailto:support@cabreralabs.net">support@cabreralabs.net</a></p>
+</div>
+
+</body>
+</html>

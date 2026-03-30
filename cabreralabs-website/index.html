@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cabrera Labs — Power BI Custom Visuals</title>
+  <meta name="description" content="Premium Power BI custom visuals. Date Range Slicer and Calendar Heatmap. One-time purchase, no subscription.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0a0f;
+      --bg2: #12121a;
+      --bg3: #1a1a28;
+      --text: #e8e8ef;
+      --text-dim: #8888a0;
+      --accent: #00d4aa;
+      --accent-glow: rgba(0, 212, 170, 0.15);
+      --accent2: #6366f1;
+      --border: rgba(255,255,255,0.06);
+      --card-bg: rgba(255,255,255,0.03);
+      --font: 'DM Sans', sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(10, 10, 15, 0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 64px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: 10px;
+      font-weight: 700; font-size: 1.1rem; color: var(--text);
+      text-decoration: none;
+    }
+    .nav-brand .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; }
+    .nav-links { display: flex; gap: 2rem; align-items: center; }
+    .nav-links a {
+      color: var(--text-dim); text-decoration: none; font-size: 0.9rem; font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* ─── HERO ─── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center;
+      padding: 120px 2rem 80px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
+      width: 800px; height: 800px;
+      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--card-bg); border: 1px solid var(--border);
+      border-radius: 100px; padding: 6px 16px; margin-bottom: 2rem;
+      font-size: 0.85rem; color: var(--text-dim);
+    }
+    .hero-badge .pulse {
+      width: 6px; height: 6px; background: var(--accent); border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.5); }
+    }
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 700;
+      line-height: 1.1;
+      max-width: 800px;
+      margin-bottom: 1.5rem;
+      letter-spacing: -0.02em;
+    }
+    .hero h1 .gradient {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 1.2rem; color: var(--text-dim);
+      max-width: 560px; margin-bottom: 2.5rem;
+    }
+    .hero-cta {
+      display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 28px;
+      border-radius: 10px; font-weight: 600; font-size: 0.95rem;
+      text-decoration: none; cursor: pointer; border: none;
+      transition: all 0.25s;
+    }
+    .btn-primary {
+      background: var(--accent); color: var(--bg);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,212,170,0.25); }
+    .btn-ghost {
+      background: transparent; color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ─── PRODUCTS ─── */
+    .section { padding: 100px 2rem; max-width: 1200px; margin: 0 auto; }
+    .section-label {
+      font-family: var(--mono); font-size: 0.8rem; color: var(--accent);
+      text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 1rem;
+    }
+    .section-title {
+      font-size: clamp(2rem, 4vw, 3rem); font-weight: 700;
+      letter-spacing: -0.02em; margin-bottom: 1rem;
+    }
+    .section-sub { color: var(--text-dim); font-size: 1.1rem; max-width: 600px; margin-bottom: 3rem; }
+
+    .products-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+      gap: 2rem;
+    }
+    @media (max-width: 600px) {
+      .products-grid { grid-template-columns: 1fr; }
+    }
+
+    .product-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: border-color 0.3s;
+    }
+    .product-card:hover { border-color: rgba(0,212,170,0.3); }
+
+    .product-preview {
+      height: 280px;
+      padding: 24px;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .product-preview::before {
+      content: ''; position: absolute; inset: 0;
+      opacity: 0.08;
+    }
+    .product-preview.slicer { background: linear-gradient(135deg, #1a1a2e, #16213e); }
+    .product-preview.calendar { background: linear-gradient(135deg, #1a2e1a, #162e3e); }
+
+    /* Date Slicer Preview SVG */
+    .slicer-demo {
+      width: 260px; background: #434343; border-radius: 10px; padding: 16px;
+      display: flex; flex-direction: column; gap: 8px;
+      font-family: 'Segoe UI', sans-serif; box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+    }
+    .slicer-demo label {
+      font-size: 9px; color: #fff; text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .slicer-demo input[type="date"] {
+      width: 100%; background: #3c3c3c; border: 1px solid #555; border-radius: 6px;
+      color: #e2e2e2; padding: 6px 8px; font-size: 12px;
+    }
+    .slicer-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+    .slicer-tags span {
+      font-size: 10px; padding: 3px 8px; border-radius: 99px; border: 1px solid #666;
+      color: #aaa;
+    }
+    .slicer-tags span.active {
+      border-color: var(--accent); color: var(--accent); background: rgba(0,212,170,0.1);
+    }
+    .slicer-btn {
+      width: 100%; background: #ccc; color: #333; border: none; border-radius: 6px;
+      padding: 6px; font-weight: bold; font-size: 12px; cursor: default;
+    }
+
+    /* Calendar Preview */
+    .cal-demo {
+      width: 300px; background: #fff; border-radius: 10px; padding: 12px;
+      font-family: 'Segoe UI', sans-serif; box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+    }
+    .cal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #2D6A9F; color: white; padding: 8px 12px; border-radius: 6px;
+      font-size: 13px; font-weight: bold; margin-bottom: 8px;
+    }
+    .cal-header span { cursor: default; }
+    .cal-days {
+      display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;
+      text-align: center; font-size: 9px; margin-bottom: 4px;
+    }
+    .cal-days div { background: #EAF2FF; color: #2D6A9F; font-weight: bold; padding: 3px 0; border-radius: 3px; }
+    .cal-cells {
+      display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;
+      text-align: center; font-size: 10px;
+    }
+    .cal-cells .cell {
+      padding: 4px 2px; border-radius: 3px; border: 1px solid #ddd;
+      min-height: 28px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .cal-cells .cell.empty { border-color: transparent; }
+    .cal-cells .cell .day { font-size: 8px; font-weight: bold; color: #333; }
+    .cal-cells .cell .val { font-size: 9px; font-weight: bold; color: #333; }
+
+    .product-info { padding: 24px; }
+    .product-name { font-size: 1.3rem; font-weight: 700; margin-bottom: 8px; }
+    .product-desc { color: var(--text-dim); font-size: 0.95rem; margin-bottom: 16px; line-height: 1.5; }
+    .product-features {
+      list-style: none; display: flex; flex-direction: column; gap: 6px; margin-bottom: 20px;
+    }
+    .product-features li {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.9rem; color: var(--text-dim);
+    }
+    .product-features li::before {
+      content: '✓'; color: var(--accent); font-weight: bold; font-size: 0.85rem;
+    }
+    .product-bottom {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-top: 16px; border-top: 1px solid var(--border);
+    }
+    .product-price {
+      display: flex; align-items: baseline; gap: 4px;
+    }
+    .product-price .amount { font-size: 1.8rem; font-weight: 700; }
+    .product-price .label { font-size: 0.85rem; color: var(--text-dim); }
+    .btn-buy {
+      background: var(--accent); color: var(--bg);
+      padding: 12px 24px; border-radius: 10px;
+      font-weight: 700; font-size: 0.9rem;
+      border: none; cursor: pointer; transition: all 0.25s;
+    }
+    .btn-buy:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,212,170,0.3); }
+    .btn-buy:disabled { opacity: 0.6; cursor: wait; transform: none; box-shadow: none; }
+
+    /* ─── HOW IT WORKS ─── */
+    .steps {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem; margin-top: 2rem;
+    }
+    .step {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 24px;
+    }
+    .step-num {
+      font-family: var(--mono); font-size: 0.8rem; color: var(--accent);
+      margin-bottom: 12px;
+    }
+    .step h3 { font-size: 1.1rem; margin-bottom: 8px; }
+    .step p { color: var(--text-dim); font-size: 0.9rem; }
+
+    /* ─── FAQ ─── */
+    .faq-grid { display: flex; flex-direction: column; gap: 1rem; }
+    .faq-item {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px 24px;
+    }
+    .faq-q { font-weight: 700; margin-bottom: 8px; }
+    .faq-a { color: var(--text-dim); font-size: 0.95rem; }
+
+    /* ─── FOOTER ─── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 3rem 2rem;
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    /* ─── TRIAL BADGE ─── */
+    .trial-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255,193,7,0.15); color: #ffc107;
+      border: 1px solid rgba(255,193,7,0.3);
+      font-size: 0.8rem; font-weight: 600;
+      padding: 4px 12px; border-radius: 100px;
+      margin-bottom: 12px;
+    }
+
+    /* ─── MODAL ─── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 999;
+      background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 16px; padding: 32px; max-width: 420px; width: 90%;
+    }
+    .modal h3 { margin-bottom: 16px; font-size: 1.2rem; }
+    .modal input {
+      width: 100%; padding: 12px 14px; border-radius: 8px;
+      border: 1px solid var(--border); background: var(--bg);
+      color: var(--text); font-size: 1rem; font-family: var(--font);
+      margin-bottom: 12px;
+    }
+    .modal input:focus { outline: none; border-color: var(--accent); }
+    .modal .btn-row { display: flex; gap: 8px; justify-content: flex-end; }
+    .modal .btn-cancel {
+      background: transparent; color: var(--text-dim); border: 1px solid var(--border);
+      padding: 10px 18px; border-radius: 8px; cursor: pointer; font-size: 0.9rem;
+    }
+    .modal .btn-proceed {
+      background: var(--accent); color: var(--bg); border: none;
+      padding: 10px 24px; border-radius: 8px; cursor: pointer;
+      font-weight: 700; font-size: 0.9rem;
+    }
+    .modal .btn-proceed:disabled { opacity: 0.5; cursor: not-allowed; }
+    .modal .error { color: #f44; font-size: 0.85rem; margin-bottom: 8px; display: none; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-brand"><span class="dot"></span> Cabrera Labs</a>
+  <div class="nav-links">
+    <a href="#products">Products</a>
+    <a href="#how-it-works">How it works</a>
+    <a href="#faq">FAQ</a>
+    <a href="mailto:support@cabreralabs.net">Support</a>
+  </div>
+</nav>
+
+<!-- ─── HERO ─── -->
+<section class="hero">
+  <div class="hero-badge"><span class="pulse"></span> Power BI Custom Visuals</div>
+  <h1>Better visuals.<br><span class="gradient">Better decisions.</span></h1>
+  <p>Premium custom visuals for Power BI. One-time purchase. No subscription. 7 days free trial included.</p>
+  <div class="hero-cta">
+    <a href="#products" class="btn btn-primary">View Products ↓</a>
+    <a href="#how-it-works" class="btn btn-ghost">How it works</a>
+  </div>
+</section>
+
+<!-- ─── PRODUCTS ─── -->
+<section class="section" id="products">
+  <div class="section-label">Products</div>
+  <h2 class="section-title">Built to last</h2>
+  <p class="section-sub">Each visual comes with a 7-day free trial. Pay once, use forever. Up to 3 device activations per license.</p>
+
+  <div class="products-grid">
+    <!-- DATE SLICER -->
+    <div class="product-card" id="date_slicer">
+      <div class="product-preview slicer">
+        <div class="slicer-demo">
+          <label>Start Date</label>
+          <input type="date" value="2026-03-01" disabled>
+          <label>End Date</label>
+          <input type="date" value="2026-03-30" disabled>
+          <div class="slicer-tags">
+            <span>7 days</span>
+            <span>15 days</span>
+            <span class="active">1 month</span>
+            <span>6 months</span>
+          </div>
+          <button class="slicer-btn">Apply</button>
+        </div>
+      </div>
+      <div class="product-info">
+        <div class="trial-badge">⏱ 7-day free trial</div>
+        <h3 class="product-name">Date Range Slicer</h3>
+        <p class="product-desc">A sleek date range filter with quick-select presets, visual range bar, and full customization. Filters your entire report with one click.</p>
+        <ul class="product-features">
+          <li>Start/End date pickers with Apply button</li>
+          <li>Quick range presets (7d, 15d, 1m, 6m, 1y)</li>
+          <li>Visual range bar indicator</li>
+          <li>Fully customizable colors, fonts & borders</li>
+          <li>Works with Power BI Desktop & Service</li>
+        </ul>
+        <div class="product-bottom">
+          <div class="product-price">
+            <span class="amount">€9.99</span>
+            <span class="label">one-time</span>
+          </div>
+          <button class="btn-buy" onclick="openCheckout('price_1TGRNbGVqx3g496WdOweaCqn', 'Date Range Slicer')">Get License</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALENDAR HEATMAP -->
+    <div class="product-card" id="calendar_heatmap">
+      <div class="product-preview calendar">
+        <div class="cal-demo">
+          <div class="cal-header">
+            <span>◄</span> March 2026 <span>►</span>
+          </div>
+          <div class="cal-days">
+            <div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div><div>Su</div>
+          </div>
+          <div class="cal-cells" id="cal-cells"></div>
+        </div>
+      </div>
+      <div class="product-info">
+        <div class="trial-badge">⏱ 7-day free trial</div>
+        <h3 class="product-name">Calendar Heatmap</h3>
+        <p class="product-desc">A navigable monthly calendar with heatmap coloring, value display, week numbers, and cross-filtering. See your data patterns at a glance.</p>
+        <ul class="product-features">
+          <li>Monthly navigation with year/month picker</li>
+          <li>Heatmap color scale (min/mid/max)</li>
+          <li>Cross-filtering on day selection</li>
+          <li>Supports %, currency & number formats</li>
+          <li>ISO week numbers & configurable first day</li>
+        </ul>
+        <div class="product-bottom">
+          <div class="product-price">
+            <span class="amount">€9.99</span>
+            <span class="label">one-time</span>
+          </div>
+          <button class="btn-buy" onclick="openCheckout('price_1TGROVGVqx3g496Whrh6SwIa', 'Calendar Heatmap')">Get License</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── HOW IT WORKS ─── -->
+<section class="section" id="how-it-works">
+  <div class="section-label">How it works</div>
+  <h2 class="section-title">Up and running in 3 minutes</h2>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <h3>Download & Install</h3>
+      <p>Import the .pbiviz file into Power BI Desktop or upload it to your organization's visuals.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <h3>Try Free for 7 Days</h3>
+      <p>Use the visual with full functionality during the trial period. No credit card needed to start.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <h3>Buy a License</h3>
+      <p>When you're ready, purchase a one-time license for €9.99. Your key arrives instantly by email.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">04</div>
+      <h3>Activate</h3>
+      <p>Paste your license key in the visual's Format panel → License section. Done — use it forever.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FAQ ─── -->
+<section class="section" id="faq">
+  <div class="section-label">FAQ</div>
+  <h2 class="section-title">Common questions</h2>
+  <div class="faq-grid">
+    <div class="faq-item">
+      <div class="faq-q">Is this a subscription?</div>
+      <div class="faq-a">No. You pay once (€9.99) and the license is yours forever. No recurring charges.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">How many devices can I use it on?</div>
+      <div class="faq-a">Each license can be activated on up to 3 devices (e.g., your work laptop, home PC, and a colleague's machine).</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Does it work in Power BI Service (web)?</div>
+      <div class="faq-a">Yes. Install in Power BI Desktop and publish your report to the Service. The visual works in both environments.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">What happens when the trial expires?</div>
+      <div class="faq-a">The visual shows a lock screen with a link to purchase. Your report and data are untouched — just enter a license key to unlock.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">I need more activations. Can I get them?</div>
+      <div class="faq-a">Sure! Contact us at <a href="mailto:support@cabreralabs.net">support@cabreralabs.net</a> and we'll sort it out.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">Can I get a refund?</div>
+      <div class="faq-a">If you're not happy within 14 days of purchase, contact us for a full refund. No questions asked.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer>
+  <p>© 2026 Cabrera Labs Inc. All rights reserved.</p>
+  <p style="margin-top: 8px;">
+    <a href="mailto:support@cabreralabs.net">support@cabreralabs.net</a>
+  </p>
+</footer>
+
+<!-- ─── CHECKOUT MODAL ─── -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3 id="modal-title">Get License</h3>
+    <p class="error" id="modal-error"></p>
+    <input type="email" id="modal-email" placeholder="Your email address" autocomplete="email">
+    <div class="btn-row">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-proceed" id="modal-btn" onclick="proceedCheckout()">Continue to Payment</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Calendar demo cells
+  const cells = document.getElementById('cal-cells');
+  const colors = ['#C6EFCE', '#D4EDD0', '#E2EBD2', '#EFEAD4', '#FFEB9C', '#FFD87A', '#FFC558', '#FFB236', '#FF9F14', '#FF4444'];
+  // March 2026 starts on Sunday → offset = 6 (Mon-based)
+  for (let i = 0; i < 6; i++) {
+    const c = document.createElement('div');
+    c.className = 'cell empty';
+    cells.appendChild(c);
+  }
+  for (let d = 1; d <= 31; d++) {
+    const c = document.createElement('div');
+    c.className = 'cell';
+    const hasData = Math.random() > 0.3;
+    if (hasData) {
+      const val = Math.floor(Math.random() * 10);
+      c.style.backgroundColor = colors[val];
+      c.innerHTML = `<span class="day">${d}</span><span class="val">${Math.floor(Math.random()*500)+100}</span>`;
+    } else {
+      c.innerHTML = `<span class="day" style="color:#aaa">${d}</span>`;
+    }
+    cells.appendChild(c);
+  }
+
+  // Checkout flow
+  const API = 'https://merlin-backend-production-dfa1.up.railway.app';
+  let currentPriceId = '';
+
+  function openCheckout(priceId, productName) {
+    currentPriceId = priceId;
+    document.getElementById('modal-title').textContent = `Get ${productName} License`;
+    document.getElementById('modal-email').value = '';
+    document.getElementById('modal-error').style.display = 'none';
+    document.getElementById('modal-btn').disabled = false;
+    document.getElementById('modal-btn').textContent = 'Continue to Payment';
+    document.getElementById('modal').classList.add('active');
+    setTimeout(() => document.getElementById('modal-email').focus(), 100);
+  }
+
+  function closeModal() {
+    document.getElementById('modal').classList.remove('active');
+  }
+
+  async function proceedCheckout() {
+    const email = document.getElementById('modal-email').value.trim();
+    const errEl = document.getElementById('modal-error');
+    const btnEl = document.getElementById('modal-btn');
+
+    if (!email || !email.includes('@')) {
+      errEl.textContent = 'Please enter a valid email address.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    btnEl.disabled = true;
+    btnEl.textContent = 'Redirecting...';
+    errEl.style.display = 'none';
+
+    try {
+      const res = await fetch(`${API}/api/licenses/checkout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceId: currentPriceId, email })
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.error || 'Failed to create checkout session');
+      }
+    } catch (e) {
+      errEl.textContent = e.message || 'Something went wrong. Please try again.';
+      errEl.style.display = 'block';
+      btnEl.disabled = false;
+      btnEl.textContent = 'Continue to Payment';
+    }
+  }
+
+  // Close modal on overlay click
+  document.getElementById('modal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeModal();
+  });
+
+  // Enter key in email field
+  document.getElementById('modal-email').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') proceedCheckout();
+  });
+</script>
+
+</body>
+</html>
