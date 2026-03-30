@@ -500,6 +500,11 @@
   <p style="margin-top: 8px;">
     <a href="mailto:support@cabreralabs.net">support@cabreralabs.net</a>
   </p>
+  <div style="display:flex;gap:1.5rem;justify-content:center;margin-top:12px;">
+    <a href="/aviso-legal.html" style="color:var(--text-dim);font-size:0.8rem;">Aviso legal</a>
+    <a href="/privacidad.html" style="color:var(--text-dim);font-size:0.8rem;">Privacidad</a>
+    <a href="/cookies.html" style="color:var(--text-dim);font-size:0.8rem;">Cookies</a>
+  </div>
 </footer>
 
 <!-- ─── CHECKOUT MODAL ─── -->
@@ -602,6 +607,21 @@
   document.getElementById('modal-email').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') proceedCheckout();
   });
+
+  // Cookie consent
+  (function() {
+    if (localStorage.getItem('cookie_consent')) return;
+    const banner = document.createElement('div');
+    banner.id = 'cookie-banner';
+    banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9999;background:rgba(18,18,26,0.95);backdrop-filter:blur(12px);border-top:1px solid rgba(255,255,255,0.06);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:DM Sans,sans-serif;';
+    banner.innerHTML = `
+      <p style="color:#8888a0;font-size:0.85rem;margin:0;flex:1;min-width:200px;">
+        Este sitio utiliza cookies técnicas necesarias para su funcionamiento. Consulta nuestra <a href="/cookies.html" style="color:#00d4aa;text-decoration:none;">política de cookies</a>.
+      </p>
+      <button onclick="localStorage.setItem('cookie_consent','1');document.getElementById('cookie-banner').remove();" style="background:#00d4aa;color:#0a0a0f;border:none;padding:8px 20px;border-radius:8px;font-weight:600;font-size:0.85rem;cursor:pointer;white-space:nowrap;">Aceptar</button>
+    `;
+    document.body.appendChild(banner);
+  })();
 </script>
 
 </body>
